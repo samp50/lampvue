@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "LampVue",
+    "slug": "LampVue",
+    "privacy": "public",
+    "platforms": [
+      "ios"
+    ],
+    "version": "2.0",
+    "orientation": "portrait",
+    "icon": "./assets/final-lampvue-logo.png",
+    "splash": {
+      "image": "./assets/lampvue-splash-ios.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#FFFFFF"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.furnvue.lampvue",
+      "supportsTablet": false,
+      "buildNumber": "20",
+      "publishBundlePath": "ios/lampvue/Supporting/shell-app.bundle",
+      "publishManifestPath": "ios/lampvue/Supporting/shell-app-manifest.json",
+      "infoPlist": {
+        "NSCameraUsageDescription": "LampVue needs camera permission in order to retrieve photos of your furniture."
+      },
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.596302106789-nv0ke7ul7nuloi56mt05jr374p0jf73r"
+        }
+      }
+    },
+    "entryPoint": "node_modules/expo/AppEntry.js",
+    "isDetached": false,
+    "detach": {
+      "iosExpoViewUrl": "https://s3.amazonaws.com/exp-exponent-view-code/ios-v2.14.6-sdk36.0.0-8ea388d1-463b-4e91-bbf7-2d95d0174c96.tar.gz",
+      "androidExpoViewUrl": "https://s3.amazonaws.com/exp-exponent-view-code/android-v2.14.2-sdk36.0.0-ce7e16db-fd5d-4fdd-bdeb-701ba94a04d1.tar.gz"
+    },
+    "scheme": "expc4224e3166b540e3a861c8d4d55b9f80",
+    "android": {
+      "package": "com.lampvue.android",
+      "publishBundlePath": "android/app/src/main/assets/shell-app.bundle",
+      "publishManifestPath": "android/app/src/main/assets/shell-app-manifest.json"
+    }
+  }
+}
