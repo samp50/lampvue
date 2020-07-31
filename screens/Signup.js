@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react'
-import { StyleSheet, SafeAreaView, View, TouchableOpacity, KeyboardAvoidingView, ScrollView, Text, AsyncStorage, Image } from 'react-native';
+import { StyleSheet, SafeAreaView, View, TouchableOpacity, KeyboardAvoidingView, ScrollView, Text, AsyncStorage, Image, NativeModules } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 import { Button, CheckBox } from 'react-native-elements'
 import { Ionicons } from '@expo/vector-icons'
@@ -10,7 +10,15 @@ import FormButton from '../components/FormButton'
 import ErrorMessage from '../components/ErrorMessage'
 import { withFirebaseHOC } from '../config/Firebase'
 import auth from '@react-native-firebase/auth';
+import appleAuth, {
+  AppleButton,
+  AppleAuthRequestScope,
+  AppleAuthRequestOperation,
+  AppleAuthCredentialState
+} from '@invertase/react-native-apple-authentication';
 //import messaging from '@react-native-firebase/messaging';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { SocialIcon } from 'react-native-elements'
 import {
   GoogleSignin,
   GoogleSigninButton,
@@ -19,8 +27,15 @@ import {
 //import 'firebase/auth';
 import { LoginButton, AccessToken } from 'react-native-fbsdk';
 import { ImagePaths } from '../images/ImagePaths';
+import messaging from '@react-native-firebase/messaging';
+import firestore from '@react-native-firebase/firestore';
+import {
+  signInWithApple,
+  onSignInWithApple
+} from "../utils/appleSignInFunctions";
 import Fire from "../Fire";
 const firebase = require('firebase');
+const {Torch} = NativeModules;
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -36,6 +51,28 @@ const validationSchema = Yup.object().shape({
 
 class Signup extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOn: false,
+    };
+    //this.turnOn();
+  }
+  turnOn = () => {
+    Torch.turnOn();
+    this.updateTorchStatus();
+  };
+  turnOff = () => {
+    Torch.turnOff();
+    this.updateTorchStatus();
+  };
+  updateTorchStatus = () => {
+    Torch.getTorchStatus((error, isOn) => {
+      this.setState({isOn: isOn});
+    });
+    console.log("Torch status is " + this.state.isOn);
+  };
+
   state = {
     passwordVisibility: true,
     confirmPasswordVisibility: true,
@@ -44,7 +81,7 @@ class Signup extends Component {
   }
 
   componentDidMount() {
-    //this.requestUserPermission();
+    //console.log("Torch is " + JSON.stringify(Torch));
   }
 
   _syncUserWithStateAsync = async () => {
@@ -133,21 +170,145 @@ class Signup extends Component {
       let token = firebase.auth.GoogleAuthProvider.credential(data.idToken);
       firebase.auth().signInWithCredential(token)
         .then((user) => {
-            console.log(user)
+          console.log(user)
         }).catch((err) => {
-            console.error('User signin error', err);
-          });
-      });
+          console.error('User signin error', err);
+        });
+    });
   };
+
+  onAppleButtonPress = async () => {
+    // Start the sign-in request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: AppleAuthRequestOperation.LOGIN,
+      requestedScopes: [AppleAuthRequestScope.EMAIL, AppleAuthRequestScope.FULL_NAME],
+    });
+
+    // Ensure Apple returned a user identityToken
+    if (!appleAuthRequestResponse.identityToken) {
+      throw 'Apple Sign-In failed - no identify token returned';
+    }
+
+    // Create a Firebase credential from the response
+    const { identityToken, nonce } = appleAuthRequestResponse;
+    const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce);
+
+    // Sign in the user anonympusly b/c Apple Auth + Firebase DOES NOT WORK
+    firebase.auth().signInAnonymously().catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.log(error);
+    });    
+    // Disable the sign out button to prevent Apple Sign In users from losing data
+    //this.setState({signOutButtonDisabled: true});
+  }
+
+  altOnAppleButtonPress = async () => {
+    // performs login request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: AppleAuthRequestOperation.LOGIN,
+      requestedScopes: [AppleAuthRequestScope.EMAIL, AppleAuthRequestScope.FULL_NAME],
+    });
+    console.log(appleAuthRequestResponse);
+    // get current authentication state for user
+    // /!\ This method must be tested on a real device. On the iOS simulator it always throws an error.
+    const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
+
+    // use credentialState response to ensure the user is authenticated
+    if (credentialState === AppleAuthCredentialState.AUTHORIZED) {
+      console.log("Credential state is completed")
+    }
+    console.log("Completed altOnAppleSignInPress.")
+  }
+
+  webBasedAppleButtonPress = async () => {
+    var provider = new firebase.auth.OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    firebase
+      .auth()
+      .signInWithPopup(provider)
+      .then(function(result) {
+        // The signed-in user info.
+        var user = result.user;
+        // You can also get the Apple OAuth Access and ID Tokens.
+        var accessToken = result.credential.accessToken;
+        var idToken = result.credential.idToken;
+
+        // ...
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+
+        // ...
+      });
+  }
+  
+  navigateToHome= () => {
+    console.log("Called me");
+    this.props.navigation.navigate("Home");
+  }
+
+  onAppleButtonPressThree = async () => {
+    // 1). start a apple sign-in request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: AppleAuthRequestOperation.LOGIN,
+      requestedScopes: [AppleAuthRequestScope.EMAIL, AppleAuthRequestScope.FULL_NAME],
+    });
+
+    // 2). if the request was successful, extract the token and nonce
+    const { identityToken, nonce } = appleAuthRequestResponse;
+
+    // can be null in some scenarios
+    if (identityToken) {
+      // 3). create a Firebase `AppleAuthProvider` credential
+      const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce);
+
+      // 4). use the created `AppleAuthProvider` credential to start a Firebase auth request,
+      //     in this example `signInWithCredential` is used, but you could also call `linkWithCredential`
+      //     to link the account to an existing user
+      auth().signInWithCredential(appleCredential).then(authResult => {
+        console.log(authResult);
+        auth().onAuthStateChanged(function(user) {
+          if (user) {
+            console.log("User is established below:");
+            console.log(user);
+            console.log("currentUser is established below:");
+            console.log(auth().currentUser);
+            //this.props.navigation.navigate("Home");
+            //navigateToHome();
+          } else {
+            console.log("No user");
+          }
+        });
+      })
+      /*
+      // user is now signed in, any Firebase `onAuthStateChanged` listeners you have will trigger
+      console.warn(`Firebase authenticated via Apple, UID: ${userCredential.user.uid}`);
+      // SCP stuff below
+      console.log(userCredential);
+      auth().currentUser.reload()
+      */
+    } else {
+      // handle this - retry?
+    }
+  }
 
   facebookSignInFunc = () => {
     console.log("Starting facebookSignInFunc");
     var provider = new firebase.auth.FacebookAuthProvider();
-    firebase.auth().signInWithPopup(provider).then(function(result) {
+    firebase.auth().signInWithPopup(provider).then(function (result) {
       var token = result.credential.accessToken;
       var user = result.user;
       console.log(user);
-    }).catch(function(error) {
+    }).catch(function (error) {
       var errorCode = error.code;
       var errorMessage = error.message;
       var email = error.email;
@@ -181,30 +342,30 @@ class Signup extends Component {
       <KeyboardAwareScrollView >
         <Text></Text>
         <View style={styles.view}>
-          <Text/>
+          <Text />
         </View>
-          <Formik
-            initialValues={{
-              email: '',
-              password: '',
-              confirmPassword: '',
-              check: false
-            }}
-            onSubmit={(values, actions) => {
-              this.handleOnSignup(values, actions)
-            }}
-            validationSchema={validationSchema}>
-            {({
-              handleChange,
-              values,
-              handleSubmit,
-              errors,
-              isValid,
-              touched,
-              handleBlur,
-              isSubmitting,
-              setFieldValue
-            }) => (
+        <Formik
+          initialValues={{
+            email: '',
+            password: '',
+            confirmPassword: '',
+            check: false
+          }}
+          onSubmit={(values, actions) => {
+            this.handleOnSignup(values, actions)
+          }}
+          validationSchema={validationSchema}>
+          {({
+            handleChange,
+            values,
+            handleSubmit,
+            errors,
+            isValid,
+            touched,
+            handleBlur,
+            isSubmitting,
+            setFieldValue
+          }) => (
               <Fragment>
                 <FormInput
                   name='email'
@@ -256,53 +417,62 @@ class Signup extends Component {
                 <ErrorMessage errorValue={errors.general} />
               </Fragment>
             )}
-          </Formik>
-          <Text>
-          </Text>
-          <View style={styles.view}>
-            <GoogleSigninButton
-              style={{ width: 192, height: 48 }}
-              size={GoogleSigninButton.Size.Wide}
-              color={GoogleSigninButton.Color.Dark}
-              onPress={this.googleSignInFunc}
-              disabled={this.state.isSigninInProgress} 
-            />
-            <LoginButton
-              style={{ width: 192, height: 48 }}
-              onLoginFinished={
-                (error, result) => {
-                  if (error) {
-                    console.log("login has error: " + result.error);
-                  } else if (result.isCancelled) {
-                    console.log("login is cancelled.");
-                  } else {
-                    AccessToken.getCurrentAccessToken().then(
-                      (data) => {
-                        console.log("data is " + JSON.stringify(data));
-                        let token = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-                        console.log("Facebook token is " +  token);
-                        firebase.auth().signInWithCredential(token)
-                          .then((user) => {
-                              console.log(user)
-                          }).catch((err) => {
-                              console.error('User signin error', err);
+        </Formik>
+        <Text>
+        </Text>
+        <View style={styles.view}>
+          <GoogleSigninButton
+            style={{ width: 192, height: 48 }}
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={this.googleSignInFunc}
+            disabled={this.state.isSigninInProgress}
+          />
+          <LoginButton
+            style={{ width: 192, height: 48 }}
+            onLoginFinished={
+              (error, result) => {
+                if (error) {
+                  console.log("login has error: " + result.error);
+                } else if (result.isCancelled) {
+                  console.log("login is cancelled.");
+                } else {
+                  AccessToken.getCurrentAccessToken().then(
+                    (data) => {
+                      console.log("data is " + JSON.stringify(data));
+                      let token = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
+                      console.log("Facebook token is " + token);
+                      firebase.auth().signInWithCredential(token)
+                        .then((user) => {
+                          console.log(user)
+                        }).catch((err) => {
+                          console.error('User signin error', err);
                         });
-                      }
-                    )
-                  }
+                    }
+                  )
                 }
               }
-              onLogoutFinished={() => console.log("logout.")}/>
-          </View>
-          <Button
-            title='Have an account? Login here.'
-            onPress={this.goToLogin}
-            titleStyle={{
-              color: 'grey'
+            }
+            onLogoutFinished={() => console.log("logout.")} />
+          <AppleButton
+            buttonStyle={AppleButton.Style.WHITE}
+            buttonType={AppleButton.Type.SIGN_IN}
+            style={{
+              width: 192,
+              height: 48,
             }}
-            type='clear'
+            onPress={this.onAppleButtonPress}
           />
-        </KeyboardAwareScrollView>
+        </View>
+        <Button
+          title='Already have an account? Login here.'
+          onPress={this.goToLogin}
+          titleStyle={{
+            color: 'grey'
+          }}
+          type='clear'
+        />
+      </KeyboardAwareScrollView>
     )
   }
 }
@@ -331,3 +501,15 @@ const styles = StyleSheet.create({
 })
 
 export default withFirebaseHOC(Signup);
+
+/*
+<AppleButton
+  buttonStyle={AppleButton.Style.WHITE}
+  buttonType={AppleButton.Type.SIGN_IN}
+  style={{
+    width: 192,
+    height: 48,
+  }}
+  onPress={this.altOnAppleButtonPress}
+/>
+*/

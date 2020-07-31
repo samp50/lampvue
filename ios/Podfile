@@ -35,10 +35,10 @@ target 'LampVue' do
   pod 'DoubleConversion', :podspec => "#{rnPrefix}/third-party-podspecs/DoubleConversion.podspec"
   pod 'glog', :podspec => "#{rnPrefix}/third-party-podspecs/glog.podspec"
   pod 'Folly', :podspec => "#{rnPrefix}/third-party-podspecs/Folly.podspec"
-  /
+  
   # Begin Firebase stuff
   pod 'Firebase/Messaging'
-
+  pod 'Firebase/Auth'
   # Other native modules
 
   # Automatically detect installed unimodules

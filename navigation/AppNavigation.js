@@ -16,6 +16,11 @@ import { DrawerView } from "react-navigation";
 import { render } from 'react-dom';
 import List from '../components/List';
 
+// If user is signed in with Apple (anonymously), disable sign out button
+/*if (firebase.auth().currentUser.isAnonymous == true) {
+  var signOutButtonDisabled =  true
+}*/
+
 function signOut(navigation) {
   firebase.auth().signOut();
   navigation.navigate('Login');
@@ -101,6 +106,7 @@ const contentComponent = (props) => (
               ],
               {cancelable: false},
             )}
+            disabled={firebase.auth().currentUser.isAnonymous}
           />
         </View>
       </View>

@@ -225,6 +225,8 @@ PODS:
     - BoringSSL-GRPC/Interface (= 0.0.7)
   - BoringSSL-GRPC/Interface (0.0.7)
   - DoubleConversion (1.1.6)
+  - EXAppleAuthentication (2.2.1):
+    - UMCore
   - EXCamera (8.2.0):
     - UMBarCodeScannerInterface
     - UMCore
@@ -234,6 +236,8 @@ PODS:
     - UMPermissionsInterface
   - EXConstants (9.0.0):
     - UMConstantsInterface
+    - UMCore
+  - EXCrypto (8.2.1):
     - UMCore
   - EXErrorRecovery (1.1.0):
     - UMCore
@@ -680,14 +684,14 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
     - ReactCommon/jscallinvoker (= 0.61.5)
-  - RNAppleAuthentication (1.1.1):
+  - RNAppleAuthentication (1.1.2):
     - React
   - RNCMaskedView (0.1.6):
     - React
   - RNFBApp (8.1.0):
     - Firebase/CoreOnly (~> 6.27.0)
     - React
-  - RNFBAuth (8.0.9):
+  - RNFBAuth (8.2.0):
     - Firebase/Auth (~> 6.27.0)
     - React
     - RNFBApp
@@ -732,8 +736,10 @@ PODS:
 
 DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
+  - EXAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - EXCamera (from `../node_modules/expo-camera/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
+  - EXCrypto (from `../node_modules/expo-crypto/ios`)
   - EXErrorRecovery (from `../node_modules/expo-error-recovery/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
@@ -753,6 +759,7 @@ DEPENDENCIES:
   - EXWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
+  - Firebase/Auth
   - Firebase/Messaging
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
@@ -845,10 +852,14 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
+  EXAppleAuthentication:
+    :path: "../node_modules/expo-apple-authentication/ios"
   EXCamera:
     :path: "../node_modules/expo-camera/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
+  EXCrypto:
+    :path: "../node_modules/expo-crypto/ios"
   EXErrorRecovery:
     :path: "../node_modules/expo-error-recovery/ios"
   EXFileSystem:
@@ -996,8 +1007,10 @@ SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
+  EXAppleAuthentication: 5b3da71bada29e2423d8ea27e5538ef0d75aba62
   EXCamera: a7d29d25bf78a058c9111080cc1fc5b73814ce09
   EXConstants: 5304709b1bea70a4828f48ba4c7fc3ec3b2d9b17
+  EXCrypto: 867e1d45d513e39ab9d7706232435edb1cf756cd
   EXErrorRecovery: 8f4c21ab2f51bf75defe4536f841a37de59b0661
   EXFileSystem: cf4232ba7c62dc49b78c2d36005f97b6fddf0b01
   EXFont: b60f7a8900e3a12e7be3b2a40e19b22c7b5f89ba
@@ -1069,10 +1082,10 @@ SPEC CHECKSUMS:
   React-RCTText: 9ccc88273e9a3aacff5094d2175a605efa854dbe
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
-  RNAppleAuthentication: 64a29b6d4c6435afa6341ab07c8b1ccf5ed68fef
+  RNAppleAuthentication: 473b2c076f1a48a537610580a168c1fb6d0a90c6
   RNCMaskedView: a88953beefbd347a29072d9eba90e42945fe291e
   RNFBApp: 5d3900b676c2d07a20afc5a7075caff109cf8520
-  RNFBAuth: 8c0b2c8ec1e6dd33a759bd89ad12cbe28e6380f2
+  RNFBAuth: 82b94c2f0a851be529a19f5fda2dffb390bfdd7f
   RNFBFirestore: 4004d6576846262c5a04e274c37a865ad59e162a
   RNFBMessaging: d48cb0f82684c57a9cc72a3d99f391662e46b07a
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
@@ -1095,6 +1108,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: cb890c79c63885504ddc0efd7a7d01481760aca2
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
-PODFILE CHECKSUM: 2733a7f2f0c9b0a7e0b4b095742f9e6a7f0b5cd7
+PODFILE CHECKSUM: 2d519b87291a14b93d78959679c3fd6f7a6670a4
 
 COCOAPODS: 1.9.3

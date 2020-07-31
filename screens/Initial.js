@@ -21,7 +21,8 @@ class Initial extends Component {
           this.props.navigation.navigate('App')
         } else {
           // if the user has previously signed out from the app
-          this.props.navigation.navigate('Auth')
+          this.props.navigation.navigate('Auth');
+          
         }
       })
     } catch (error) {

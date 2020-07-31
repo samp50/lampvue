@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, View, AsyncStorage } from 'react-native';
+import { Alert, StyleSheet, Text, View, AsyncStorage, NativeModules } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 /*
 import { FinalStack } from './navigation/AppNavigation.js';
@@ -14,14 +14,17 @@ import AppContainer from './navigation';
 import firebase from '@react-native-firebase/app';
 //const firebase = require('firebase');
 import messaging from '@react-native-firebase/messaging';
+import firestore from '@react-native-firebase/firestore';
+const {Torch} = NativeModules;
 
 export default class App extends React.Component {
-
+  
   state = {
     appIsReady: false,
   };
 
   async componentDidMount() {
+    //console.log("Torch is " + JSON.stringify(Torch)); delete
     console.log("App.js has been mounted, calling FirebaseInstance below...");
     try {
       await SplashScreen.preventAutoHideAsync();
@@ -32,7 +35,8 @@ export default class App extends React.Component {
     //const defaultAppMessaging = admin.messaging();
     this.requestUserPermission();
     this.propsPushNotifications();
-    this.generateFCMToken();
+    //var FCMToken = this.generateFCMToken();
+    //this.setState({FCMToken: FCMToken}).then(console.log("Set state for FCM token"))
   }
 
   handlePushNotifications = () => {
@@ -64,12 +68,11 @@ export default class App extends React.Component {
   }
 
   generateFCMToken = async () => {
-    await messaging().registerDeviceForRemoteMessages();
+    //await messaging().registerDeviceForRemoteMessages();
     const token = await messaging().getToken();
     console.log("FCM token is " + token);
-    //await postToApi('/users/1234/tokens', { token });
+    return token;
   }
-  
 
   prepareResources = async () => {
     this.setState({ appIsReady: true }, async () => {

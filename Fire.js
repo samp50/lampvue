@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import getUserInfo from './utils/getUserInfo';
 import shrinkImageAsync from './utils/shrinkImageAsync';
 import uploadPhoto from './utils/uploadPhoto';
-import { AsyncStorage } from "react-native";
+import { AsyncStorage } from 'react-native';
 const firebase = require('firebase');
 require('firebase/firestore');
 import messaging from '@react-native-firebase/messaging';
@@ -13,14 +13,18 @@ firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     console.log("user.uid is: " + user.uid);
     collectionName = user.uid;
+    messaging().getToken().then(token => {
+      console.log("FCM from Fire.js token is " + token);
+      firestore().collection('notSignedInUsers').doc(token).delete({token: token});
+    });
   } else {
     //Check AsyncStorage to see if user is restarting from new app version
     console.log("User info not available, checking to see if user is starting with new app version.");
-    AsyncStorage.getAllKeys().then(result => {  //delete 
-      //console.log("AsyncStorage is " + result);
-      result.forEach(element => console.log("AsyncStorage new is" + element));
+    //await messaging().registerDeviceForRemoteMessages();
+    messaging().getToken().then(token => {
+      console.log("FCM from Fire.js token is " + token);
+      firestore().collection('notSignedInUsers').doc(token).set({token: token});
     });
-
   }
 });
 
