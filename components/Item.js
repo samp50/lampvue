@@ -58,9 +58,9 @@ export default class Item extends React.Component {
     } else {
       //commisionedLink = commisionedLink;
     }
-    const imgW = imageWidth || this.state.width;
-    const imgH = imageHeight || this.state.height;
-    const aspect = imgW / imgH || 1;
+    const imgW = 1080;//imageWidth || this.state.width;
+    const imgH = 1350;//imageHeight || this.state.height;
+    const aspect = imgW / imgH;// || 1;
 
     return (
       <View>
