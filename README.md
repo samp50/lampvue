@@ -1,3 +1,6 @@
 # LampVue: iOS Furniture Revisualzier (Retired)
 
 This is the code for my React-Native based furnture revisualizer. This was the first original, full-stack project I completed. This app ran on a React Native frontend, with significant backend code written in Python. Backend infrastructure resided exclusively in AWS. After photos were uploaded by the user to an S3 bucket, the image would trigger a series of Lambda events, one for each lamp product, and images would be added into a database per each LampVue user. Before that, a Python image-inpainting algorithm would remove the original lamp and replace its bounding-boxed area with a scrubbed version of the rest of the image's background. This produced mized results in quality, but the more solid the background and better the lighting the photo, the better the outcome for the inpainted image. When the user refreshed their feed on the home screen of the app, the new lamp images would be superimposed over this scrubbed area with attendent pricing data, product names and Amazon affiliate link for each product. 
+
+![alt text](https://github.com/samuelcphillips/lampvue/blob/main/images/ezgif-7-546bcbdc27.gif?raw=true)
+![alt text](https://github.com/samuelcphillips/lampvue/blob/main/images/ezgif-7-b1f7248182.gif?raw=true)
